@@ -1,5 +1,5 @@
 - [x] get and set github token
-- [ ] get forks
+- [x] get forks
 - [x] get branches with prs connected to a fork
 - [ ] propose deletion for merged branches
   - [ ] check if head commit is the same as in the merged pr
