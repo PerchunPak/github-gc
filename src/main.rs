@@ -6,7 +6,8 @@ use crate::logs::setup_logging;
 use envconfig::Envconfig;
 use tracing::*;
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let config = Config::init_from_env().expect("could not load config");
     setup_logging();
 }
