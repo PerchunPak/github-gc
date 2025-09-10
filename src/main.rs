@@ -1,12 +1,12 @@
 mod config;
+mod logs;
 
-use config::Config;
+use crate::config::Config;
+use crate::logs::setup_logging;
 use envconfig::Envconfig;
+use tracing::*;
 
 fn main() {
-    let config = match Config::init_from_env() {
-        Ok(config) => config,
-        Err(e) => panic!("Could not load config: {e}"),
-    };
-    println!("{0}", config.github_token);
+    let config = Config::init_from_env().expect("could not load config");
+    setup_logging();
 }

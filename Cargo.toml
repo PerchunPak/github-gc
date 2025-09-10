@@ -5,3 +5,5 @@ edition = "2024"
 
 [dependencies]
 envconfig = "0.11.0"
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.20", features = ["env-filter"] }
