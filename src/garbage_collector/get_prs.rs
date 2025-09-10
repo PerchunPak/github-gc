@@ -30,7 +30,7 @@ pub struct PR {
     url: String,
 }
 
-pub async fn collect_prs(client: &reqwest::Client) -> Vec<PR> {
+pub async fn get_prs(client: &reqwest::Client) -> Vec<PR> {
     return iter_through_query::<UserPrs, PR>(
         &client,
         "user PRs".to_string(),
