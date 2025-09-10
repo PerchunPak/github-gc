@@ -1,0 +1,20 @@
+query UserForks($after: String) {
+  viewer {
+    repositories(
+      after: $after,
+      first: 100,
+      isFork: true
+    ) {
+      nodes {
+        nameWithOwner
+        defaultBranchRef {
+          name
+        }
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
+    }
+  }
+}
