@@ -55,7 +55,6 @@ async fn make_request(client: &reqwest::Client, after: &Option<String>) -> user_
     debug!("Fetching user PRs...");
 
     let variables = user_prs::Variables {
-        first: 100,
         after: after.clone(),
     };
 
