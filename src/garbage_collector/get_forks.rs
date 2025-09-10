@@ -1,6 +1,6 @@
 use crate::garbage_collector::general::*;
 use graphql_client::GraphQLQuery;
-use std::string::String;
+use std::{collections::HashMap, string::String};
 use tracing::*;
 
 #[derive(GraphQLQuery)]
@@ -14,13 +14,13 @@ struct UserForks;
 #[allow(dead_code)]
 #[derive(Debug)]
 pub struct Fork {
-    name: String,
-    default_branch_name: String,
-    branches: Vec<String>,
+    pub name: String,
+    pub default_branch_name: String,
+    pub branches: Vec<String>,
 }
 
-pub async fn get_forks(client: &reqwest::Client) -> Vec<Fork> {
-    return iter_through_query::<UserForks, Fork>(
+pub async fn get_forks(client: &reqwest::Client) -> HashMap<String, Fork> {
+    let forks = iter_through_query::<UserForks, Fork>(
         &client,
         "user forks".to_string(),
         handle_response,
@@ -29,6 +29,8 @@ pub async fn get_forks(client: &reqwest::Client) -> Vec<Fork> {
         },
     )
     .await;
+
+    return vec_forks_to_hashmap(forks);
 }
 
 fn handle_response(response: user_forks::ResponseData) -> (Vec<Fork>, bool, String) {
@@ -66,4 +68,14 @@ fn handle_response(response: user_forks::ResponseData) -> (Vec<Fork>, bool, Stri
         page_info.has_next_page,
         page_info.end_cursor.unwrap(),
     );
+}
+
+fn vec_forks_to_hashmap(forks: Vec<Fork>) -> HashMap<String, Fork> {
+    let mut map: HashMap<String, Fork> = HashMap::new();
+
+    for fork in forks {
+        map.insert(fork.name.to_string(), fork);
+    }
+
+    return map;
 }

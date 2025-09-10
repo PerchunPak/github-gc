@@ -13,7 +13,7 @@ type URI = String;
 )]
 struct UserPrs;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum PullRequestState {
     CLOSED,
     MERGED,
@@ -23,11 +23,11 @@ pub enum PullRequestState {
 #[allow(dead_code)]
 #[derive(Debug)]
 pub struct PR {
-    title: String,
-    repo: String,
-    branch_name: String,
-    state: PullRequestState,
-    url: String,
+    pub title: String,
+    pub repo: String,
+    pub branch_name: String,
+    pub state: PullRequestState,
+    pub url: String,
 }
 
 pub async fn get_prs(client: &reqwest::Client) -> Vec<PR> {
