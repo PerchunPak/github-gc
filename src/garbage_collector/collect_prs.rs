@@ -20,6 +20,7 @@ pub enum PullRequestState {
     OPEN,
 }
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct PR {
     title: String,

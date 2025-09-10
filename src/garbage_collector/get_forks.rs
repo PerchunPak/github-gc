@@ -11,6 +11,7 @@ use tracing::*;
 )]
 struct UserForks;
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Fork {
     name: String,
