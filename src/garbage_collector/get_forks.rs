@@ -1,6 +1,7 @@
 use crate::garbage_collector::general::*;
 use graphql_client::GraphQLQuery;
 use std::string::String;
+use tracing::*;
 
 #[derive(GraphQLQuery)]
 #[graphql(
@@ -14,6 +15,7 @@ struct UserForks;
 pub struct Fork {
     name: String,
     default_branch_name: String,
+    branches: Vec<String>,
 }
 
 pub async fn get_forks(client: &reqwest::Client) -> Vec<Fork> {
@@ -34,9 +36,25 @@ fn handle_response(response: user_forks::ResponseData) -> (Vec<Fork>, bool, Stri
     for wrapped_pr in response.viewer.repositories.nodes.unwrap().iter() {
         let fork = wrapped_pr.clone().unwrap();
 
+        let branches: Vec<String> = fork
+            .refs
+            .unwrap()
+            .nodes
+            .unwrap()
+            .iter()
+            .map(|ref_| ref_.clone().unwrap().name)
+            .collect();
+        if branches.len() == 100 {
+            error!(
+                "Repo {} has more than 100 branches, this is currently unsupported! Processing only first 100 branches",
+                fork.name_with_owner
+            );
+        };
+
         forks.push(Fork {
             name: fork.name_with_owner,
             default_branch_name: fork.default_branch_ref.unwrap().name,
+            branches: branches,
         });
     }
 

@@ -10,6 +10,11 @@ query UserForks($after: String) {
         defaultBranchRef {
           name
         }
+        refs(refPrefix: "refs/heads/", first: 100) {
+          nodes {
+            name
+          }
+        }
       }
       pageInfo {
         endCursor
