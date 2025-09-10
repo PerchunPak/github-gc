@@ -1,4 +1,5 @@
 mod collect_prs;
+mod general;
 mod get_forks;
 
 pub async fn run_garbage_collect(client: &reqwest::Client) {

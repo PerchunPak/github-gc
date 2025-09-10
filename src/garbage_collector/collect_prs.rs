@@ -1,6 +1,6 @@
-use graphql_client::{GraphQLQuery, reqwest::post_graphql};
+use crate::garbage_collector::general::*;
+use graphql_client::GraphQLQuery;
 use std::string::String;
-use tracing::*;
 
 #[allow(clippy::upper_case_acronyms)]
 type URI = String;
@@ -30,44 +30,15 @@ pub struct PR {
 }
 
 pub async fn collect_prs(client: &reqwest::Client) -> Vec<PR> {
-    let mut i = 0;
-    let mut prs: Vec<PR> = vec![];
-    let mut has_next_page = true;
-    let mut after_option: Option<String> = None;
-    while has_next_page {
-        i += 1;
-        info!("Fetching user PRs... Page {i}");
-        let response_data = make_request(&client, &after_option).await;
-
-        let data: Vec<PR>;
-        let after: String;
-        (data, has_next_page, after) = handle_response(response_data);
-
-        prs.extend(data);
-        after_option = Some(after);
-    }
-
-    return prs;
-}
-
-#[tracing::instrument(skip(client))]
-async fn make_request(client: &reqwest::Client, after: &Option<String>) -> user_prs::ResponseData {
-    debug!("Fetching user PRs...");
-
-    let variables = user_prs::Variables {
-        after: after.clone(),
-    };
-
-    let response_body =
-        post_graphql::<UserPrs, _>(&client, "https://api.github.com/graphql", variables)
-            .await
-            // TODO: retry?
-            .expect("Cannot collect user PRs");
-
-    let result = response_body.data.expect("missing response data");
-
-    info!("Fetched!");
-    return result;
+    return iter_through_query::<UserPrs, PR>(
+        &client,
+        "user PRs".to_string(),
+        handle_response,
+        |after| user_prs::Variables {
+            after: after.clone(),
+        },
+    )
+    .await;
 }
 
 fn handle_response(response: user_prs::ResponseData) -> (Vec<PR>, bool, String) {
