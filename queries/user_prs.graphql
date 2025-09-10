@@ -1,0 +1,22 @@
+query UserPrs($first: Int!, $after: String) {
+  viewer {
+    pullRequests(first: $first, after: $after) {
+      nodes {
+        title
+        headRef {
+          name
+          repository {
+            isFork
+            nameWithOwner
+          }
+        }
+        url
+        state
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
+    }
+  }
+}

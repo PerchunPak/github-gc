@@ -1,4 +1,5 @@
 .direnv/
+/queries/schema.graphql
 
 # Created by https://www.toptal.com/developers/gitignore/api/linux,windows,visualstudiocode,jetbrains,rust,rust-analyzer
 # Edit at https://www.toptal.com/developers/gitignore?templates=linux,windows,visualstudiocode,jetbrains,rust,rust-analyzer
