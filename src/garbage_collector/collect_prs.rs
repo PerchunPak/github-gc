@@ -1,4 +1,3 @@
-use crate::config::Config;
 use graphql_client::{GraphQLQuery, reqwest::post_graphql};
 use std::string::String;
 use tracing::*;
@@ -30,9 +29,7 @@ pub struct PR {
     url: String,
 }
 
-pub async fn collect_prs(config: &Config) -> Vec<PR> {
-    let client = build_client(&config);
-
+pub async fn collect_prs(client: &reqwest::Client) -> Vec<PR> {
     let mut i = 0;
     let mut prs: Vec<PR> = vec![];
     let mut has_next_page = true;
@@ -51,21 +48,6 @@ pub async fn collect_prs(config: &Config) -> Vec<PR> {
     }
 
     return prs;
-}
-
-fn build_client(config: &Config) -> reqwest::Client {
-    return reqwest::Client::builder()
-        .user_agent("graphql-rust/0.10.0")
-        .default_headers(
-            std::iter::once((
-                reqwest::header::AUTHORIZATION,
-                reqwest::header::HeaderValue::from_str(&format!("Bearer {}", config.github_token))
-                    .unwrap(),
-            ))
-            .collect(),
-        )
-        .build()
-        .unwrap();
 }
 
 #[tracing::instrument(skip(client))]
