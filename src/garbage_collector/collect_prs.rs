@@ -45,12 +45,7 @@ pub async fn collect_prs(client: &reqwest::Client) -> Vec<PR> {
 fn handle_response(response: user_prs::ResponseData) -> (Vec<PR>, bool, String) {
     let mut prs: Vec<PR> = vec![];
 
-    let nodes = response
-        .viewer
-        .pull_requests
-        .nodes
-        .expect("You do not have any pull requests, what are you even doing here???");
-    for wrapped_pr in nodes.iter() {
+    for wrapped_pr in response.viewer.pull_requests.nodes.unwrap().iter() {
         let pr = wrapped_pr.clone().unwrap();
 
         let head_ref = match pr.head_ref {
