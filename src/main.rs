@@ -23,8 +23,14 @@ fn build_reqwest_client(config: &Config) -> reqwest::Client {
 
 #[tokio::main]
 async fn main() {
-    let config = Config::init_from_env().expect("could not load config");
     setup_logging();
+    let config = match Config::init_from_env() {
+        Ok(x) => x,
+        Err(e) => {
+            tracing::error!("could not load config: {:?}", e);
+            return;
+        }
+    };
 
     let client = build_reqwest_client(&config);
     crate::garbage_collector::run_garbage_collect(&client).await;
