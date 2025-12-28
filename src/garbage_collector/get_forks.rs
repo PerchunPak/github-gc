@@ -1,6 +1,6 @@
 use crate::garbage_collector::general::*;
 use graphql_client::GraphQLQuery;
-use std::{collections::HashMap, string::String};
+use std::string::String;
 use tracing::*;
 
 #[allow(clippy::upper_case_acronyms)]
@@ -28,8 +28,8 @@ pub struct Fork {
     pub branches: Vec<ForkBranchInfo>,
 }
 
-pub async fn get_forks(client: &reqwest::Client) -> HashMap<String, Fork> {
-    let forks = iter_through_query::<UserForks, Fork>(
+pub async fn get_forks(client: &reqwest::Client) -> Vec<Fork> {
+    return iter_through_query::<UserForks, Fork>(
         &client,
         "user forks".to_string(),
         handle_response,
@@ -38,10 +38,6 @@ pub async fn get_forks(client: &reqwest::Client) -> HashMap<String, Fork> {
         },
     )
     .await;
-
-    // Turn our fork vector into hashmap, so we
-    // can easier get PR's repo by `nameWithOwner`
-    return vec_forks_to_hashmap(forks);
 }
 
 fn handle_response(
@@ -87,14 +83,4 @@ fn handle_response(
         page_info.has_next_page,
         page_info.end_cursor.unwrap(),
     );
-}
-
-fn vec_forks_to_hashmap(forks: Vec<Fork>) -> HashMap<String, Fork> {
-    let mut map: HashMap<String, Fork> = HashMap::new();
-
-    for fork in forks {
-        map.insert(fork.name.to_string(), fork);
-    }
-
-    return map;
 }
