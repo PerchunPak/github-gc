@@ -33,7 +33,9 @@ pub async fn get_forks(client: &reqwest::Client) -> HashMap<String, Fork> {
     return vec_forks_to_hashmap(forks);
 }
 
-fn handle_response(response: user_forks::ResponseData) -> (Vec<Fork>, bool, String) {
+fn handle_response(
+    response: user_forks::ResponseData,
+) -> (Vec<Fork>, bool, String) {
     let mut forks: Vec<Fork> = vec![];
 
     for wrapped_pr in response.viewer.repositories.nodes.unwrap().iter() {

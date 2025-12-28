@@ -42,7 +42,9 @@ pub async fn get_prs(client: &reqwest::Client) -> Vec<PR> {
     .await;
 }
 
-fn handle_response(response: user_prs::ResponseData) -> (Vec<PR>, bool, String) {
+fn handle_response(
+    response: user_prs::ResponseData,
+) -> (Vec<PR>, bool, String) {
     let mut prs: Vec<PR> = vec![];
 
     for wrapped_pr in response.viewer.pull_requests.nodes.unwrap().iter() {

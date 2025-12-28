@@ -17,7 +17,8 @@ pub async fn iter_through_query<Q: GraphQLQuery, R>(
         info!("Fetching {}... Page {i}", &action);
 
         let variables = variables_builder(&after_option);
-        let response_data = make_request::<Q>(&client, &action, variables).await;
+        let response_data =
+            make_request::<Q>(&client, &action, variables).await;
 
         let data: Vec<R>;
         let after: String;
@@ -38,10 +39,14 @@ async fn make_request<Q: GraphQLQuery>(
 ) -> Q::ResponseData {
     debug!("Fetching {action}...");
 
-    let response_body = post_graphql::<Q, _>(&client, "https://api.github.com/graphql", variables)
-        .await
-        // TODO: retry?
-        .expect("Cannot get {action}");
+    let response_body = post_graphql::<Q, _>(
+        &client,
+        "https://api.github.com/graphql",
+        variables,
+    )
+    .await
+    // TODO: retry?
+    .expect("Cannot get {action}");
 
     let result = response_body.data.expect("missing response data");
 

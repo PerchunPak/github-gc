@@ -11,7 +11,10 @@ pub struct RepoAndBranch {
     pub branch: String,
 }
 
-pub fn collect_merged_branches(forks: &HashMap<String, Fork>, prs: &Vec<PR>) -> Vec<RepoAndBranch> {
+pub fn collect_merged_branches(
+    forks: &HashMap<String, Fork>,
+    prs: &Vec<PR>,
+) -> Vec<RepoAndBranch> {
     let mut to_delete: Vec<RepoAndBranch> = vec![];
 
     for pr in prs {

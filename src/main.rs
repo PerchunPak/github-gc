@@ -12,8 +12,11 @@ fn build_reqwest_client(config: &Config) -> reqwest::Client {
         .default_headers(
             std::iter::once((
                 reqwest::header::AUTHORIZATION,
-                reqwest::header::HeaderValue::from_str(&format!("Bearer {}", config.github_token))
-                    .unwrap(),
+                reqwest::header::HeaderValue::from_str(&format!(
+                    "Bearer {}",
+                    config.github_token
+                ))
+                .unwrap(),
             ))
             .collect(),
         )
