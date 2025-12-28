@@ -1,6 +1,7 @@
 use crate::garbage_collector::general::*;
 use graphql_client::GraphQLQuery;
 use std::string::String;
+use tracing::*;
 
 #[allow(clippy::upper_case_acronyms)]
 type URI = String;
@@ -55,10 +56,14 @@ fn handle_response(
 
         let head_ref = match pr.head_ref {
             Some(x) => x,
-            None => continue,
+            None => {
+                trace!("{} doesn't have head ref, skipping", pr.url);
+                continue;
+            }
         };
         let repo = head_ref.repository;
         if !repo.is_fork {
+            trace!("{} is not a fork, skipping", pr.url);
             continue;
         }
 
