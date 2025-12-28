@@ -1,0 +1,7 @@
+GRAPHQL https://api.github.com/graphql HTTP/1.1
+Authorization: Bearer {{GITHUB_TOKEN}}
+Accept: application/json
+
+< ./user_prs.graphql
+
+{ "after": null }
