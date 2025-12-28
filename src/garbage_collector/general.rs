@@ -45,6 +45,6 @@ async fn make_request<Q: GraphQLQuery>(
 
     let result = response_body.data.expect("missing response data");
 
-    info!("Fetched!");
+    debug!("Fetched!");
     return result;
 }
