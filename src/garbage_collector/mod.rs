@@ -1,3 +1,4 @@
+mod collect_dead_forks;
 mod collect_merged_branches;
 mod general;
 mod get_forks;
@@ -11,5 +12,7 @@ pub async fn run_garbage_collect(client: &reqwest::Client) {
     // TODO: didn't find all forks?
     info!("Found {} forks and {} PRs", forks.len(), prs.len());
 
-    let _ = collect_merged_branches::collect_merged_branches(&forks, &prs);
+    let _dead_branches =
+        collect_merged_branches::collect_merged_branches(&forks, &prs);
+    let _dead_forks = collect_dead_forks::collect_dead_forks(&forks, &prs);
 }
