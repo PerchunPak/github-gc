@@ -13,6 +13,10 @@ query UserForks($after: String) {
         refs(refPrefix: "refs/heads/", first: 100) {
           nodes {
             name
+            target {
+              __typename
+              oid
+            }
           }
         }
       }

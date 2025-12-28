@@ -9,6 +9,10 @@ query UserPrs($after: String) {
             isFork
             nameWithOwner
           }
+          target {
+            __typename
+            oid
+          }
         }
         url
         state

@@ -4,6 +4,8 @@ use std::string::String;
 
 #[allow(clippy::upper_case_acronyms)]
 type URI = String;
+#[allow(clippy::upper_case_acronyms)]
+type GitObjectID = String;
 
 #[derive(GraphQLQuery)]
 #[graphql(
@@ -13,7 +15,7 @@ type URI = String;
 )]
 struct UserPrs;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum PullRequestState {
     CLOSED,
     MERGED,
@@ -21,11 +23,12 @@ pub enum PullRequestState {
 }
 
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct PR {
     pub title: String,
     pub repo: String,
     pub branch_name: String,
+    pub commit: String,
     pub state: PullRequestState,
     pub url: String,
 }
@@ -60,14 +63,23 @@ fn handle_response(
         }
 
         prs.push(PR {
-            title: pr.title,
-            repo: repo.name_with_owner,
+            title: pr.title.to_string(),
+            repo: repo.name_with_owner.to_string(),
             branch_name: head_ref.name,
+            commit: head_ref
+                .target
+                .expect(&format!(
+                    "PR doesn't have commit? How?!?! Please report: {} {}",
+                    repo.name_with_owner, pr.title
+                ))
+                .oid,
             state: match pr.state {
                 user_prs::PullRequestState::CLOSED => PullRequestState::CLOSED,
                 user_prs::PullRequestState::MERGED => PullRequestState::MERGED,
                 user_prs::PullRequestState::OPEN => PullRequestState::OPEN,
-                e => panic!("Unknown PR state: {:?}", e),
+                e => {
+                    panic!("Unknown PR state: {:?} (pr title: {})", e, pr.title)
+                }
             },
             url: pr.url,
         });
