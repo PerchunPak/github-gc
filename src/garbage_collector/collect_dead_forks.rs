@@ -2,16 +2,17 @@ use std::collections::{HashMap, HashSet};
 use std::vec;
 
 use crate::garbage_collector::get_forks::ForkBranchInfo;
+use crate::garbage_collector::get_prs::PullRequestState;
 
 use super::get_forks::Fork;
 use super::get_prs::PR;
 
 pub enum ForkBranchState {
-    // no associated PR
     NoPR,
-    // has associated PR and its commit equal to PR's commit
+    HasOpenPR,
+    // has associated merged PR and its commit equal to PR's commit
     Dead,
-    // has associated PR and its commit *not* equal to PR's commit
+    // has associated merged PR and its commit *not* equal to PR's commit
     Different,
 }
 
@@ -61,7 +62,9 @@ pub fn collect_dead_forks(
             result_branches.push(ForkBranchWithState {
                 branch: fork_branch.clone(),
                 pr: Some(pr.clone()),
-                state: if pr.commit == fork_branch.commit {
+                state: if pr.state == PullRequestState::OPEN {
+                    ForkBranchState::HasOpenPR
+                } else if pr.commit == fork_branch.commit {
                     ForkBranchState::Dead
                 } else {
                     ForkBranchState::Different
