@@ -40,7 +40,7 @@ async fn make_request<Q: GraphQLQuery>(
     debug!("Fetching {action}...");
 
     let response_body = post_graphql::<Q, _>(
-        &client,
+        client,
         "https://api.github.com/graphql",
         variables,
     )
