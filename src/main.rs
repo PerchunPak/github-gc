@@ -4,9 +4,10 @@ mod logs;
 
 use crate::config::Config;
 use crate::logs::setup_logging;
+use anyhow::Context;
 use envconfig::Envconfig;
 
-fn build_reqwest_client(config: &Config) -> reqwest::Client {
+fn build_reqwest_client(config: &Config) -> anyhow::Result<reqwest::Client> {
     return reqwest::Client::builder()
         .user_agent("github-gc/0.0.0")
         .default_headers(
@@ -21,7 +22,7 @@ fn build_reqwest_client(config: &Config) -> reqwest::Client {
             .collect(),
         )
         .build()
-        .unwrap();
+        .context("could not create reqwest client");
 }
 
 #[tokio::main]
@@ -34,7 +35,7 @@ async fn main() {
             return;
         }
     };
+    let client = build_reqwest_client(&config).unwrap();
 
-    let client = build_reqwest_client(&config);
     crate::garbage_collector::run_garbage_collect(&client).await;
 }
