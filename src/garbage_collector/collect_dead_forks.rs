@@ -21,12 +21,14 @@ pub enum ForkSpecialState {
     NoPRs,
 }
 
+#[allow(dead_code)]
 pub struct ForkBranchWithState {
     pub branch: ForkBranchInfo,
     pub pr: Option<PR>,
     pub state: ForkBranchState,
 }
 
+#[allow(dead_code)]
 pub struct ForkDeadnessInfo {
     pub fork: Fork,
     pub branches: Vec<ForkBranchWithState>,
