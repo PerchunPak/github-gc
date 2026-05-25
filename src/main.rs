@@ -37,5 +37,8 @@ async fn main() {
     };
     let client = build_reqwest_client(&config).unwrap();
 
-    crate::garbage_collector::run_garbage_collect(&client).await;
+    crate::garbage_collector::run_garbage_collect(&client)
+        .await
+        .context("running garbage collector")
+        .unwrap();
 }

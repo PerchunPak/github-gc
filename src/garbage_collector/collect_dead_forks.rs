@@ -12,7 +12,7 @@ pub enum ForkBranchState {
     HasOpenPR,
     // has associated merged PR and its commit equal to PR's commit
     Dead,
-    // has associated merged PR and its commit *not* equal to PR's commit
+    // has associated merged PR and its commit is *not* equal to PR's commit
     Different,
 }
 
@@ -39,7 +39,7 @@ pub fn collect_dead_forks(
     forks_vec: &Vec<Fork>,
     prs: &Vec<PR>,
 ) -> Vec<ForkDeadnessInfo> {
-    let forks = vec_forks_to_hashmap(forks_vec);
+    let forks = vec_forks_to_hashmap(forks_vec.clone());
     let mut result: Vec<ForkDeadnessInfo> = vec![];
     let branches_map = prs_to_branches(prs);
 
@@ -97,7 +97,7 @@ pub fn collect_dead_forks(
 }
 
 fn prs_to_branches(prs: &Vec<PR>) -> HashMap<String, HashSet<String>> {
-    let mut result: HashMap<String, HashSet<String>> = HashMap::new();
+    let mut result = HashMap::new();
 
     for pr in prs {
         result
@@ -109,11 +109,11 @@ fn prs_to_branches(prs: &Vec<PR>) -> HashMap<String, HashSet<String>> {
     return result;
 }
 
-fn vec_forks_to_hashmap(forks: &Vec<Fork>) -> HashMap<String, Fork> {
+fn vec_forks_to_hashmap(forks: Vec<Fork>) -> HashMap<String, Fork> {
     let mut map: HashMap<String, Fork> = HashMap::new();
 
     for fork in forks {
-        map.insert(fork.name.to_string(), fork.clone());
+        map.insert(fork.name.to_string(), fork);
     }
 
     return map;

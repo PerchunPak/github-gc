@@ -1,4 +1,7 @@
-use crate::garbage_collector::general::*;
+use crate::garbage_collector::{
+    general::*, get_prs::user_prs::UserPrsViewerPullRequestsNodes,
+};
+use anyhow::Context;
 use graphql_client::GraphQLQuery;
 use std::string::String;
 use tracing::*;
@@ -34,7 +37,7 @@ pub struct PR {
     pub url: String,
 }
 
-pub async fn get_prs(client: &reqwest::Client) -> Vec<PR> {
+pub async fn get_prs(client: &reqwest::Client) -> anyhow::Result<Vec<PR>> {
     return iter_through_query::<UserPrs, PR>(
         &client,
         "user PRs".to_string(),
@@ -43,54 +46,64 @@ pub async fn get_prs(client: &reqwest::Client) -> Vec<PR> {
             after: after.clone(),
         },
     )
-    .await;
+    .await
+    .context("getting user PRs");
 }
 
 fn handle_response(
     response: user_prs::ResponseData,
-) -> (Vec<PR>, bool, String) {
+) -> anyhow::Result<(Vec<PR>, bool, Option<String>)> {
     let mut prs: Vec<PR> = vec![];
 
-    for wrapped_pr in response.viewer.pull_requests.nodes.unwrap().iter() {
-        let pr = wrapped_pr.clone().unwrap();
+    if response.viewer.pull_requests.nodes.is_none() {
+        return Ok((prs, false, None));
+    }
 
-        let head_ref = match pr.head_ref {
-            Some(x) => x,
-            None => {
-                trace!("{} doesn't have head ref, skipping", pr.url);
+    for wrapped_pr in response.viewer.pull_requests.nodes.unwrap().iter() {
+        let pr = wrapped_pr.clone().expect("how can we get a list of nones?");
+        match parse_pr(pr) {
+            Ok(parsed) => prs.push(parsed),
+            Err(error) => {
+                error!("{:?}", error);
                 continue;
             }
         };
-        let repo = head_ref.repository;
-        if !repo.is_fork {
-            trace!("{} is not a fork, skipping", pr.url);
-            continue;
-        }
-
-        prs.push(PR {
-            title: pr.title.to_string(),
-            repo: repo.name_with_owner.to_string(),
-            branch_name: head_ref.name,
-            commit: head_ref
-                .target
-                .expect(&format!(
-                    "PR doesn't have commit? How?!?! Please report: {} {}",
-                    repo.name_with_owner, pr.title
-                ))
-                .oid,
-            state: match pr.state {
-                user_prs::PullRequestState::CLOSED => PullRequestState::CLOSED,
-                user_prs::PullRequestState::MERGED => PullRequestState::MERGED,
-                user_prs::PullRequestState::OPEN => PullRequestState::OPEN,
-                e => {
-                    panic!("Unknown PR state: {:?} (pr title: {})", e, pr.title)
-                }
-            },
-            url: pr.url,
-        });
     }
 
     let page_info = response.viewer.pull_requests.page_info;
 
-    return (prs, page_info.has_next_page, page_info.end_cursor.unwrap());
+    return Ok((prs, page_info.has_next_page, page_info.end_cursor));
+}
+
+fn parse_pr(pr: UserPrsViewerPullRequestsNodes) -> anyhow::Result<PR> {
+    let head_ref = pr.head_ref.ok_or(
+        //
+        anyhow::anyhow!("PR doesn't have head ref, skipping"),
+    )?;
+
+    let repo = head_ref.repository;
+    if !repo.is_fork {
+        return Err(anyhow::anyhow!("Repo PR is not a fork, skipping"));
+    }
+
+    return Ok(PR {
+        title: pr.title.to_string(),
+        repo: repo.name_with_owner.to_string(),
+        branch_name: head_ref.name,
+        commit: head_ref
+            .target
+            .ok_or(anyhow::anyhow!(
+                "PR doesn't have commit? How?!?! Please report",
+            ))?
+            .oid,
+        state: match pr.state {
+            user_prs::PullRequestState::CLOSED => PullRequestState::CLOSED,
+            user_prs::PullRequestState::MERGED => PullRequestState::MERGED,
+            user_prs::PullRequestState::OPEN => PullRequestState::OPEN,
+            e => {
+                return Err(anyhow::anyhow!("Unknown PR state: {:?}", e));
+            }
+        },
+        url: pr.url,
+    });
 }
